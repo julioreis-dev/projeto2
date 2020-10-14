@@ -2,6 +2,7 @@ import os
 import re
 import pandas as pd
 from threading import Thread
+from time import time
 
 
 def catalogfiles(directory):
@@ -47,13 +48,32 @@ def boxfilter(files):
             print(df_read)
 
 
+def executiontime(*args):
+    execution = args[0] - args[1]
+    hr = execution // 3600
+    if hr == 0:
+        minute = execution // 60
+        seg = round((execution % 60) // 1, 2)
+    else:
+        resthr = execution % 3600
+        minute = resthr // 60
+        seg = round((minute % 60) // 1, 2)
+    return 'Tempo de execução da aplicação: {} hs : {} min : {} seg\nProcesso finalizado com sucesso!!!' \
+        .format(hr, minute, seg)
+
+
 def main():
-    dest = r'C:\convert\saida\juazeiro\2020-01-01_2020-12-31'
+    v0 = time()
+    dest = r'C:\convert\saida\sol do futuro\2020-06-01_2020-07-31'
     filestotal = catalogfiles(dest)
     t1 = Thread(target=inverterfilter, args=(filestotal[0],))
     t1.start()
     t2 = Thread(target=boxfilter, args=(filestotal[1],))
     t2.start()
+    t2.join()
+    v1 = time()
+    tm = executiontime(v1, v0)
+    print(tm)
 
 
 if __name__ == '__main__':

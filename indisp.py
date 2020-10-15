@@ -1,7 +1,7 @@
 import os
 import re
 from indisp_inverter import Inverterfilter
-from boxfilter import Boxfilter
+from indisp_stringbox import Boxfilter
 from threading import Thread
 from time import time
 

@@ -1,6 +1,7 @@
 import os
 import re
-import pandas as pd
+from indisp_inverter import Inverterfilter
+from boxfilter import Boxfilter
 from threading import Thread
 from time import time
 
@@ -23,31 +24,6 @@ def catalogfiles(directory):
     return listfileinv, listfilebox
 
 
-def inverterfilter(files):
-    for n in files:
-        label = n[-22:-4]
-        df = pd.read_csv(n)
-        df_read = df.loc[df['COMS STATUS'] == 255]
-        del df_read['ACTIVE POWER']
-        if not df_read.empty:
-            df_read = pd.DataFrame(df_read, columns=['timestamp', 'COMS STATUS', 'EQUIPAMENTO'])
-            df_read = df_read.fillna(label)
-            print(df_read)
-
-
-def boxfilter(files):
-    for n in files:
-        label = n[-28:-4]
-        df = pd.read_csv(n)
-        df_read = df.loc[df['COMS STATUS'] == 255]
-        del df_read['Current']
-        del df_read['Power']
-        if not df_read.empty:
-            df_read = pd.DataFrame(df_read, columns=['timestamp', 'COMS STATUS', 'EQUIPAMENTO'])
-            df_read = df_read.fillna(label)
-            print(df_read)
-
-
 def executiontime(*args):
     execution = args[0] - args[1]
     hr = execution // 3600
@@ -64,13 +40,16 @@ def executiontime(*args):
 
 def main():
     v0 = time()
-    dest = r'C:\convert\saida\sol do futuro\2020-06-01_2020-07-31'
+    dest = r'C:\convert\saida\são pedro\2020-05-01_2020-05-18'
     filestotal = catalogfiles(dest)
-    t1 = Thread(target=inverterfilter, args=(filestotal[0],))
+    t1 = Thread(target=Inverterfilter, args=(filestotal[0],))
     t1.start()
-    t2 = Thread(target=boxfilter, args=(filestotal[1],))
+
+    t2 = Thread(target=Inverterfilter, args=(filestotal[0],))
     t2.start()
-    t2.join()
+
+
+
     v1 = time()
     tm = executiontime(v1, v0)
     print(tm)

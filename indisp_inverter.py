@@ -21,6 +21,8 @@ class Inverterfilter:
                 df_read = df_read.fillna(label)
                 for r in dataframe_to_rows(df_read, index=False, header=True):
                     ws.append(r)
+                ws['f2'] = df_read.shape[0]
+                    # ws.cell(row=2, column=7).value = df_read.shape[0]
         wb.save('teste1.xlsx')
 
 

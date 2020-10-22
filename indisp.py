@@ -52,7 +52,8 @@ def main():
     v1 = time()
     tm = executiontime(v1, v0)
     print(tm)
-
+    print('{} inversores possuem dados de indisponibilidade.'.format(t1))
+    print('{} strings possuem dados de indisponibilidade.'.format(t2))
 
 if __name__ == '__main__':
     main()

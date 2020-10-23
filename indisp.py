@@ -40,7 +40,7 @@ def executiontime(*args):
 
 def main():
     v0 = time()
-    dest = r'C:\convert\saida\juazeiro\2020-01-01_2020-01-31'
+    dest = r'C:\convert\saida\são pedro\2020-03-01_2020-03-31'
     filestotal = catalogfiles(dest)
     manage = inv.InverterFilter(filestotal[0])
     t1 = Thread(target=manage.filter)

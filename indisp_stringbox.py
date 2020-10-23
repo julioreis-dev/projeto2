@@ -38,7 +38,7 @@ class BoxFilter:
         ws['e2'] = 'Equipamento:'
         ws['e3'] = 'Ocorrencias:'
         ws['e4'] = 'Tempo total:'
-        ws['e5'] = '% de indisponibilidade no mês:'
+        ws['e5'] = 'Indisponível no mês:'
         ws['f2'] = '{}'.format(label)
         ws['f3'] = self.ocurr
         ws['f4'] = self.calctime()

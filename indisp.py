@@ -40,20 +40,18 @@ def executiontime(*args):
 
 def main():
     v0 = time()
-    dest = r'C:\convert\saida\são pedro\2020-01-01_2020-01-31'
+    dest = r'C:\convert\saida\juazeiro\2020-01-01_2020-01-31'
     filestotal = catalogfiles(dest)
-    manage = inv.Inverterfilter(filestotal[0])
+    manage = inv.InverterFilter(filestotal[0])
     t1 = Thread(target=manage.filter)
     t1.start()
-    manage2 = box.Boxfilter(filestotal[1])
+    manage2 = box.BoxFilter(filestotal[1])
     t2 = Thread(target=manage2.filter)
     t2.start()
     t2.join()
     v1 = time()
     tm = executiontime(v1, v0)
     print(tm)
-    print('{} inversores possuem dados de indisponibilidade.'.format(t1))
-    print('{} strings possuem dados de indisponibilidade.'.format(t2))
 
 if __name__ == '__main__':
     main()

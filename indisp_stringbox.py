@@ -3,7 +3,7 @@ from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 
 
-class Boxfilter:
+class BoxFilter:
     def __init__(self, files):
         self.files = files
 
@@ -23,6 +23,22 @@ class Boxfilter:
                 df_read = df_read.fillna(label)
                 for r in dataframe_to_rows(df_read, index=False, header=True):
                     ws.append(r)
-                ws['f2'] = df_read.shape[0]
+                self.ocurr = df_read.shape[0]
+                ws['f2'] = self.ocurr
+                ws['f3'] = self.calctime()
+                ws['f4'] = 'O equipamento "{}" ficou {}% indisponivel no mês'.format(label, (round(self.calcporc(), 2)))
                 number += 1
+        print('{} strings possuem dados de indisponibilidade.'.format(number))
         wb.save('teste2.xlsx')
+
+    def calctime(self):
+        self.hr = (self.ocurr // 4)
+        self.minute = (self.ocurr - (self.hr * 4)) * 15
+        seg = round((self.minute % 60) // 1, 2)
+        return 'Tempo de indisponibilidade: {} hs : {} min : {} seg'.format(self.hr, self.minute, 0)
+
+    def calcporc(self):
+        tothr = (31 * 24)
+        convhrs = self.minute/60
+        result = ((self.hr+convhrs) * 100) / tothr
+        return result

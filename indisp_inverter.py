@@ -1,6 +1,7 @@
 import pandas as pd
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
+from openpyxl.styles import Border, Side, PatternFill, Font, GradientFill, Alignment, Protection
 
 
 class InverterFilter:
@@ -27,19 +28,30 @@ class InverterFilter:
     def formatcontent(self, wb, label, df_read):
         wb.create_sheet(label)
         ws = wb.get_sheet_by_name(label)
-        df_read = pd.DataFrame(df_read, columns=['EQUIPAMENTO', 'timestamp', 'COMS STATUS'])
-        df_read = df_read.fillna(label)
+        df_read = pd.DataFrame(df_read, columns=['timestamp', 'COMS STATUS'])
         for r in dataframe_to_rows(df_read, index=False, header=True):
             ws.append(r)
+        self.formatsheet(ws, df_read, label)
+
+    def formatsheet(self, ws, df_read, label):
         self.ocurr = df_read.shape[0]
-        ws['f2'] = self.ocurr
-        ws['f3'] = self.calctime()
-        ws['f4'] = 'O equipamento "{}" ficou {}% indisponivel no mês'.format(label, (round(self.calcporc(), 2)))
+        ws['e2'] = 'Equipamento:'
+        ws['e3'] = 'Ocorrencias:'
+        ws['e4'] = 'Tempo total:'
+        ws['e5'] = '% de indisponibilidade no mês:'
+        ws['f2'] = '{}'.format(label)
+        ws['f3'] = self.ocurr
+        ws['f4'] = self.calctime()
+        ws['f5'] = '{}%'.format(round(self.calcporc(), 2))
+        ws['f2'].alignment = Alignment(horizontal='left')
+        ws['f3'].alignment = Alignment(horizontal='left')
+        ws['f4'].alignment = Alignment(horizontal='left')
+        ws['f5'].alignment = Alignment(horizontal='left')
 
     def calctime(self):
         self.hr = (self.ocurr // 4)
         self.minute = (self.ocurr - (self.hr * 4)) * 15
-        return 'Tempo de indisponibilidade: {} hs : {} min : {} seg'.format(self.hr, self.minute, 0)
+        return '{} hs : {} min : {} seg'.format(self.hr, self.minute, 0)
 
     def calcporc(self):
         tothr = (31 * 24)

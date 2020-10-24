@@ -34,9 +34,9 @@ class InverterFilter:
             del df_read['ACTIVE POWER']
             if not df_read.empty:
                 general_datas = self.formatcontent(wb, label, df_read)
-                generallist = self.listdata(general_datas[0], general_datas[1], general_datas[2], general_datas[3])
+                dataslist = self.listdata(general_datas[0], general_datas[1], general_datas[2], general_datas[3])
                 number += 1
-        self.report(wb, generallist[0], generallist[1], generallist[2], generallist[3])
+        self.report(wb, dataslist[0], dataslist[1], dataslist[2], dataslist[3])
         wb.save('teste1.xlsx')
         wb.close()
         print('{} Inversores possuem registro de indisponibilidade.'.format(number))

@@ -1,21 +1,30 @@
 import pandas as pd
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
-from openpyxl.styles import Border, Side, PatternFill, Font, GradientFill, Alignment, Protection
+from openpyxl.styles import Alignment
 
 
 class InverterFilter:
-    def __init__(self, files, ocurr=0, hr=0, minute=0):
+    def __init__(self, files, ocurr=0, hr=0, minute=0, listequip=None, listocurr=None, listtime=None, listporc=None):
+        if listporc is None:
+            listporc = []
+        if listtime is None:
+            listtime = []
+        if listocurr is None:
+            listocurr = []
+        if listequip is None:
+            listequip = []
+
         self.files = files
         self.ocurr = ocurr
         self.hr = hr
         self.minute = minute
+        self.listequip = listequip
+        self.listocurr = listocurr
+        self.listtime = listtime
+        self.listporc = listporc
 
     def filter(self):
-        listequip = []
-        listocurr = []
-        listtime = []
-        listporc = []
         wb = Workbook()
         number = 0
         for n in self.files:
@@ -25,19 +34,12 @@ class InverterFilter:
             del df_read['ACTIVE POWER']
             if not df_read.empty:
                 general_datas = self.formatcontent(wb, label, df_read)
-                listequip.append(general_datas[0])
-                listocurr.append(general_datas[1])
-                listtime.append(general_datas[2])
-                listporc.append(general_datas[3])
+                generallist = self.listdata(general_datas[0], general_datas[1], general_datas[2], general_datas[3])
                 number += 1
-        wt = wb.get_sheet_by_name('Sheet')
-        obj = {'Equipamento': listequip, 'Ocorrências': listocurr, 'Tempo': listtime, '% indisp': listporc}
-        df_report = pd.DataFrame(data=obj)
-        for r in dataframe_to_rows(df_report, index=False, header=True):
-            wt.append(r)
-        print('{} inversores possuem registro de indisponibilidade.'.format(number))
+        self.report(wb, generallist[0], generallist[1], generallist[2], generallist[3])
         wb.save('teste1.xlsx')
         wb.close()
+        print('{} Inversores possuem registro de indisponibilidade.'.format(number))
 
     def formatcontent(self, wb, label, df_read):
         wb.create_sheet(label)
@@ -49,7 +51,8 @@ class InverterFilter:
         self.formatsheet(ws)
         return datas
 
-    def formatsheet(self, ws):
+    @staticmethod
+    def formatsheet(ws):
         ws['e2'] = 'Equipamento:'
         ws['e3'] = 'Ocorrencias:'
         ws['e4'] = 'Tempo total:'
@@ -62,7 +65,7 @@ class InverterFilter:
     def recorddata(self, ws, label, df_read):
         self.ocurr = df_read.shape[0]
         sheet_name = label
-        ocurr =  self.ocurr
+        ocurr = self.ocurr
         calctime = self.calctime()
         porcen = round(self.calcporc(), 2)
         ws['f2'] = '{}'.format(sheet_name)
@@ -71,8 +74,12 @@ class InverterFilter:
         ws['f5'] = '{}%'.format(porcen)
         return sheet_name, ocurr, calctime, porcen
 
-    def listdata(self):
-        pass
+    def listdata(self, *args):
+        self.listequip.append(args[0])
+        self.listocurr.append(args[1])
+        self.listtime.append(args[2])
+        self.listporc.append(args[3])
+        return self.listequip, self.listocurr, self.listtime, self.listporc
 
     def calctime(self):
         self.hr = (self.ocurr // 4)
@@ -84,3 +91,11 @@ class InverterFilter:
         convhrs = self.minute / 60
         result = ((self.hr + convhrs) * 100) / tothr
         return result
+
+    @staticmethod
+    def report(*args):
+        wt = args[0].get_sheet_by_name('Sheet')
+        obj = {'Equipamento': args[1], 'Ocorrências': args[2], 'Tempo': args[3], '% indisp': args[4]}
+        df_report = pd.DataFrame(data=obj)
+        for r in dataframe_to_rows(df_report, index=False, header=True):
+            wt.append(r)

@@ -6,7 +6,7 @@ from strategy import Strategy
 class InverterFilter(Strategy):
 
     def __init__(self, files):
-        super().__init__(files, ocurr=0, hr=0, minute=0, listequip=None, listocurr=None, listtime=None, listporc=None)
+        super().__init__(files)
 
     def filter(self):
         wb = Workbook()
@@ -26,3 +26,4 @@ class InverterFilter(Strategy):
         wb.save('teste1.xlsx')
         wb.close()
         print('{}/{} Inversores possuem registro de indisponibilidade.'.format(number, total_files))
+        

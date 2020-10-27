@@ -1,58 +1,45 @@
 import pandas as pd
 from openpyxl.utils.dataframe import dataframe_to_rows
-from openpyxl.styles import Alignment
+from openpyxl.styles import Font, Alignment
 
 
 class Strategy:
-    def __init__(self, files, hr=0, ocurr=0, minute=0, listequip=None, listocurr=None, listtime=None, listporc=None):
-        if listporc is None:
-            listporc = []
-        if listtime is None:
-            listtime = []
-        if listocurr is None:
-            listocurr = []
-        if listequip is None:
-            listequip = []
-
+    def __init__(self, files, ocurr=0, hr=0, minute=0):
         self.files = files
         self.ocurr = ocurr
         self.hr = hr
         self.minute = minute
-        self.listequip = listequip
-        self.listocurr = listocurr
-        self.listtime = listtime
-        self.listporc = listporc
+        self.listequip = []
+        self.listocurr = []
+        self.listtime = []
+        self.listporc = []
 
-    def formatcontent(self, wb, label, df_read):
-        wb.create_sheet(label)
-        ws = wb.get_sheet_by_name(label)
-        df_read = pd.DataFrame(df_read, columns=['timestamp', 'COMS STATUS'])
-        for r in dataframe_to_rows(df_read, index=False, header=True):
+    def formatcontent(self, *args):
+        args[0].create_sheet(args[1])
+        ws = args[0].get_sheet_by_name(args[1])
+        df = pd.DataFrame(args[2], columns=['timestamp', 'COMS STATUS'])
+        for r in dataframe_to_rows(df, index=False, header=True):
             ws.append(r)
-        datas = self.recorddata(ws, label, df_read)
+        datas = self.recorddata(ws, args[1], df)
         self.formatsheet(ws)
         return datas
 
     @staticmethod
     def formatsheet(ws):
-        ws['e2'] = 'Equipamento:'
-        ws['e3'] = 'Ocorrencias:'
-        ws['e4'] = 'Tempo total:'
-        ws['e5'] = 'Indisp no mês:'
-        ws['f2'].alignment = Alignment(horizontal='left')
-        ws['f3'].alignment = Alignment(horizontal='left')
-        ws['f4'].alignment = Alignment(horizontal='left')
-        ws['f5'].alignment = Alignment(horizontal='left')
+        flags = ['Equipamento:', 'Eventos:', 'Tempo total:', 'Indisp no mês:']
+        for line, notification in enumerate(flags):
+            ws.cell(row=line+2, column=5).value = notification
+            ws.cell(row=line+2, column=5).font = Font(bold=True)
+            ws.cell(row=line+2, column=6).alignment = Alignment(horizontal='left')
 
-    def recorddata(self, ws, label, df_read):
-        self.ocurr = df_read.shape[0]
-        sheet_name = label
+    def recorddata(self, *args):
+        self.ocurr = args[2].shape[0]
+        sheet_name = '{}'.format(args[1])
         calctime = self.calctime(self.ocurr)
-        porcen = round(self.calcporc(), 2)
-        ws['f2'] = '{}'.format(sheet_name)
-        ws['f3'] = self.ocurr
-        ws['f4'] = calctime
-        ws['f5'] = '{}%'.format(porcen)
+        porcen = '{}%'.format(round(self.calcporc(), 2))
+        generaldatas = [sheet_name, self.ocurr, calctime, porcen]
+        for line, gen in enumerate(generaldatas):
+            args[0].cell(row=line + 2, column=6).value = gen
         return sheet_name, self.ocurr, calctime, porcen
 
     def listdata(self, *args):
@@ -64,7 +51,7 @@ class Strategy:
 
     def calctime(self, noc):
         self.hr = (noc // 4)
-        self.minute = (noc - (self.hr * 4)) * 15
+        self.minute = ((noc - (self.hr * 4)) * 15)
         return '{} hs : {} min : {} seg'.format(self.hr, self.minute, 0)
 
     def calcporc(self):
@@ -77,8 +64,8 @@ class Strategy:
     def report(*args):
         wt = args[0].get_sheet_by_name('Sheet')
         wt.title = 'Relatório-Steag'
-        obj = {'Equipamento': args[1], 'Ocorrências': args[2], 'Tempo': args[3], '% indisp': args[4]}
+        obj = {'Equipamento': args[1], 'Eventos': args[2], 'Tempo': args[3], '% indisp': args[4]}
         df_report = pd.DataFrame(data=obj)
-        df_report.sort_values('Ocorrências', ascending=False, inplace=True)
+        df_report.sort_values('Eventos', ascending=False, inplace=True)
         for r in dataframe_to_rows(df_report, index=False, header=True):
             wt.append(r)

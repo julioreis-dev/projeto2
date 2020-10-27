@@ -26,4 +26,3 @@ class InverterFilter(Strategy):
         wb.save('teste1.xlsx')
         wb.close()
         print('{}/{} Inversores possuem registro de indisponibilidade.'.format(number, total_files))
-        

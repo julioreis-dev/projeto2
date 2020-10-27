@@ -4,7 +4,7 @@ from openpyxl.styles import Alignment
 
 
 class Strategy:
-    def __init__(self, files, ocurr=0, hr=0, minute=0, listequip=None, listocurr=None, listtime=None, listporc=None):
+    def __init__(self, files, hr=0, ocurr=0, minute=0, listequip=None, listocurr=None, listtime=None, listporc=None):
         if listporc is None:
             listporc = []
         if listtime is None:
@@ -47,14 +47,13 @@ class Strategy:
     def recorddata(self, ws, label, df_read):
         self.ocurr = df_read.shape[0]
         sheet_name = label
-        ocurr = self.ocurr
-        calctime = self.calctime()
+        calctime = self.calctime(self.ocurr)
         porcen = round(self.calcporc(), 2)
         ws['f2'] = '{}'.format(sheet_name)
-        ws['f3'] = ocurr
+        ws['f3'] = self.ocurr
         ws['f4'] = calctime
         ws['f5'] = '{}%'.format(porcen)
-        return sheet_name, ocurr, calctime, porcen
+        return sheet_name, self.ocurr, calctime, porcen
 
     def listdata(self, *args):
         self.listequip.append(args[0])
@@ -63,9 +62,9 @@ class Strategy:
         self.listporc.append(args[3])
         return self.listequip, self.listocurr, self.listtime, self.listporc
 
-    def calctime(self):
-        self.hr = (self.ocurr // 4)
-        self.minute = (self.ocurr - (self.hr * 4)) * 15
+    def calctime(self, noc):
+        self.hr = (noc // 4)
+        self.minute = (noc - (self.hr * 4)) * 15
         return '{} hs : {} min : {} seg'.format(self.hr, self.minute, 0)
 
     def calcporc(self):
@@ -77,11 +76,9 @@ class Strategy:
     @staticmethod
     def report(*args):
         wt = args[0].get_sheet_by_name('Sheet')
-        wt.title = 'Relatório'
-        # obj = [data1, data2, data3, data4]
-        # col = ['Equipamento', 'Ocorrências', 'Tempo', '% Indisp']
-        # df_report = pd.DataFrame(np.array(obj), index=col).T
+        wt.title = 'Relatório-Steag'
         obj = {'Equipamento': args[1], 'Ocorrências': args[2], 'Tempo': args[3], '% indisp': args[4]}
         df_report = pd.DataFrame(data=obj)
+        df_report.sort_values('Ocorrências', ascending=False, inplace=True)
         for r in dataframe_to_rows(df_report, index=False, header=True):
             wt.append(r)

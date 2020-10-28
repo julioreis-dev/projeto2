@@ -4,7 +4,7 @@ from openpyxl.styles import Font, Alignment
 
 
 class Strategy:
-    def __init__(self, files, ocurr=0, hr=0, minute=0):#revisar construtor
+    def __init__(self, files, ocurr=0, hr=0, minute=0):
         self.files = files
         self.ocurr = ocurr
         self.hr = hr
